@@ -3,7 +3,6 @@ import scipy
 import matplotlib.pyplot as plt
 from scipy.sparse import csr_matrix
 
-
 import read_mesh
 
 
@@ -18,5 +17,5 @@ if __name__ == '__main__':
     
     read_mesh.draw_meshes(elements,points)
     plt.show()
-
+    print("test github")
     pass
