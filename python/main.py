@@ -17,5 +17,5 @@ if __name__ == '__main__':
     
     read_mesh.draw_meshes(elements,points)
     plt.show()
-    print("test github")
-    pass
+
+    
