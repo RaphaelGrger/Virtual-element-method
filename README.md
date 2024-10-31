@@ -27,25 +27,20 @@ Cette méthode représente une avancée significative dans le domaine de l'analy
 
 ## Requirements
 
-- Python 3.x
+- Python 3.12.7
 - NumPy
 - Matplotlib
-
-You can install the required packages using pip:
-
-```bash
-pip install numpy matplotlib
-```
+- Scipy
 
 ## Installation
 
 Clone this repository to your local machine:
 
 ```bash
-git clone https://github.com/FlorentGerbaud/advanced-optimization.git
+git clone https://github.com/RaphaelGrger/Virtual-element-method.git
 ```
 ```bash
-cd advanced-optimization
+cd Virtual-element-method
 ```
 
 ## Usage
@@ -59,7 +54,7 @@ python main.py
 ## Functions:
 - **`read_meshes(fname):`** Return nelements, elements, points.
 - **`print_points(nelements,elements):`** Print sth.
-etc etc
+etc etc, à compléter au fur et à mesure
 
 ## License
 
