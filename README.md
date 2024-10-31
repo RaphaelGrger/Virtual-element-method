@@ -1,3 +1,8 @@
+![PNS](logo-pns.png)
+## MAM5/M2-INUM
+# Projet de fin d'étude
+# 2024-25
+
 # Virtual-element-method
 
 ## Overview
