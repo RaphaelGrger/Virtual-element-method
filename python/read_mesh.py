@@ -34,71 +34,88 @@ def print_points(nelements,elements) :
     for i in range(nelements):
         print( "element", i, "points", elements.getrow(i).indices )
 
+def extract_meshes(elements,points) :
+    indptr = elements.indptr
+    indices = elements.indices
+    
+    L = [] #list of polygons
+
+    for i in range(len(indptr) - 1):  
+        first_idx = indptr[i]
+        last_idx = indptr[i + 1]
+
+        element_points_indices = indices[first_idx:last_idx]
+        V = [points[j] for j in element_points_indices]
+        
+        L.append(V)
+    return L
+
 
 ################### Mesh drawing ###################
 
-def draw_figure(V) :
+def draw_figure(V,axis) :
 
     X = [v[0] for v in V] + [V[0][0]]
     Y = [v[1] for v in V] + [V[0][1]]
-    plt.plot(X,Y,'-',color='k',linewidth=0.5)
+    axis.plot(X,Y,'-',color='k',linewidth=0.5)
     pass
 
-def draw_meshes(elements, points):
-    
-    indptr = elements.indptr  
-    indices = elements.indices  
-
-    for i in range(len(indptr) - 1):  
-        first_idx = indptr[i]
-        last_idx = indptr[i + 1]
-
-        element_points_indices = indices[first_idx:last_idx]
-        V = [points[j] for j in element_points_indices]
-        
-        draw_figure(V)
+def draw_meshes(V,axis):
+    for v in V :    
+        draw_figure(v,axis)
     pass
 
+def draw_normals(midpoints,normals,axis=plt) :
+    for mid,normal in zip(midpoints,normals):
+        axis.quiver(mid[0], mid[1], normal[0], normal[1], color='0.2', scale=20)
+    pass
 
-#### Operations ####
+################### Properties ###################
 
-#Calcul area 1/2(u ∧ v)
-def area(x,y) :
-    
-    return (1/2)* np.cross(x,y)
 
-def middles_segments(elements,points) : #return every middles of segments
-    
-    indptr = elements.indptr  
-    indices = elements.indices  
-    middles = []
+###### Area
+def isobarycenter(V) :
+    n = len(V[0])
+    bary = [0] * n
+    for v in V :
+        for i in range(n) :
+            bary[i] += v[i]
+    return np.array([x / len(V) for x in bary])
 
-    for i in range(len(indptr) - 1):  
-        first_idx = indptr[i]
-        last_idx = indptr[i + 1]
-
-        element_points_indices = indices[first_idx:last_idx]
-        V = [points[j] for j in element_points_indices]
-        middles.append([(V[i]+ V[i+1])/2 for i in range(len(V)-1)])
+def area(poly) :
+    isobary = isobarycenter(poly)
+    area_poly = 0
+    for i in range(len(poly)) :
+        AG = isobary - poly[i]
+        BG = isobary - poly[(i+1) % len(poly)]
+        area_poly += 0.5 * np.abs(np.cross(AG,BG))
         
-    return middles
+    return area_poly
+
+###### Middles and normals
 
 def normal_vect(a,b) : #Unit normal vector of [AB]
-
     return np.array( [b[1] - a[1], a[0] - b[0] ])/np.linalg.norm(b-a)
 
-def normal_vector(elements, points) : #Return all normals vectors 
-    
-    indptr = elements.indptr  
-    indices = elements.indices  
+def mid_and_normals(L) : 
+    middles = []
     normals = []
+    for poly in L :
+        middle_points = [(poly[i] + poly[(i + 1) % len(poly)]) / 2 for i in range(len(poly))]
+        normal = [normal_vect(poly[i], poly[(i + 1) % len(poly)]) for i in range(len(poly))]
+        for m,n in zip(middle_points,normal) :
+            middles.append(m)
+            normals.append(n)
+        #middles.append(middle_points)
+        #normals.append(normal)
 
-    for i in range(len(indptr) - 1):  
-        first_idx = indptr[i]
-        last_idx = indptr[i + 1]
+    return middles , normals
 
-        element_points_indices = indices[first_idx:last_idx]
-        V = [points[j] for j in element_points_indices]
-        normals.append([normal_vect(V[i],V[i+1]) for i in range(len(V)-1)])
-        
+
+def normal_vector(L) : #Return all normals vectors 
+    normals = []
+    for poly in L :  
+        normals_vect = [normal_vect(poly[i], poly[(i + 1) % len(poly)]) for i in range(len(poly))]
+        for nv in normals_vect :
+            normals.append(nv)    
     return normals
