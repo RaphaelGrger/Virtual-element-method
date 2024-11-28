@@ -2,52 +2,36 @@ import numpy as np
 import scipy
 import matplotlib.pyplot as plt
 from scipy.sparse import csr_matrix
-from matplotlib.tri import Triangulation
 
-import read_mesh
+import functions as fct
+import read_mesh as rm
 import vem
 
 ################### Variables ###################
 
 fname = 'voronoi'
-
-def plot_solution(vertices, elements, U, axis):
-    # Crée une triangulation à partir des éléments
-    x, y = vertices[:, 0], vertices[:, 1]
-    triangulation = Triangulation(x, y, elements)
+input_path = '../meshes/'
     
-    # Tracé de la solution
-    axis.figure(figsize=(8, 6))
-    axis.tricontourf(triangulation, U, levels=100, cmap="viridis")
-    axis.colorbar(label="Solution u(x, y)")
-    axis.scatter(x, y, color='k', s=1)  # Ajouter les points des sommets pour référence
-    axis.title("Solution de l'équation de Poisson")
-    axis.xlabel("x")
-    axis.ylabel("y")
-    axis.show()
-
+def test(x,y) :
+    return x**2+y**2
 
 if __name__ == '__main__':
     
-    Nelements, elements, points = read_mesh.read_meshes(fname)
+    Nelements, elements, vertices = rm.read_meshes(fname)
+    u,verts = vem.vem(fname,vem.rhs,vem.square_boundary_condition)
     
-    meshes = read_mesh.extract_meshes(elements,points)
-    middles,normals = read_mesh.mid_and_normals(meshes)
+    V = rm.extract_meshes(elements,verts)
 
-    U, vertices, elements = vem.vem(fname, vem.rhs_function, vem.boundary_condition)
+    #middles,normals = read_mesh.mid_and_normals(meshes)
+    print("Somme des aires : {}".format(np.sum([fct.area(poly) for poly in V])))
 
-    print("Somme des aires : {}".format(np.sum([read_mesh.area(poly) for poly in meshes])))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
+    rm.draw_meshes(V,ax1)
 
-
-    fig = plt.figure()
-
-    ax1 = fig.add_subplot(221) #meshes
-    read_mesh.draw_meshes(meshes,ax1)
+    #vem.plot_solution(vertices,test(vertices[:,0],vertices[:,1]),ax2)
     
-    ax2 = fig.add_subplot(222) #normals
-    read_mesh.draw_normals(middles,normals,ax2)
-    
-    ax3 = fig.add_subplot(223)
-    plot_solution(vertices, elements, U,ax3)
-
+    vem.plot_solution(vertices,u,ax2)
     plt.show()
+
+
+    print(np.max(np.abs(vem.square_boundary_condition(vertices) - u)))
