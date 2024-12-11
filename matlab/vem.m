@@ -50,10 +50,11 @@ for el_id = 1:length(mesh.elements)
 			D(vertex_id, poly_id) = dot(vert - centroid, poly_degree) / diameter;
 			B(poly_id, vertex_id) = 0.5 * dot(monomial_grad, vertex_normal);
 		end
-	end
+    end
 	projector = (B*D) \ B; % Compute the local Ritz projector to polynomials
 	stabilising_term = (eye(n_sides) - D * projector)' * (eye(n_sides) - D * projector);
-	G = B*D; G(1, :) = 0;
+	G = B*D;
+    G(1, :) = 0;
 	local_stiffness = projector' * G * projector + stabilising_term;
 	K(vert_ids,vert_ids) = K(vert_ids,vert_ids) + local_stiffness; % Copy local to global
 	F(vert_ids) = F(vert_ids) + rhs(centroid) * area / n_sides;
