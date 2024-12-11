@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import scipy
 import matplotlib.pyplot as plt
@@ -9,32 +10,37 @@ import vem
 
 ################### Variables ###################
 
-fname = 'urban' #'squares', 'triangles', 'voronoi', 'smoothed-voronoi', 'non-convex', 'urban'
+fname = 'triangles'  # 'squares', 'triangles', 'voronoi', 'smoothed-voronoi', 'non-convex', 'urban'
 input_path = './meshes/'
-    
-def test(x,y) :
-    return x**2+y**2
+output_dir = './python/res'
+
+def test(x, y):
+    return x**2 + y**2
 
 def boundary_test(coord):
-    return coord[:,0] + coord[:,1] 
+    return coord[:, 0] + coord[:, 1] 
 
 if __name__ == '__main__':
     
     Nelements, elements, vertices = rm.read_meshes(fname)
-    u,verts = vem.vem(fname,vem.rhs,vem.square_boundary_condition)
+    u, verts = vem.vem(fname, vem.rhs, vem.square_boundary_condition)
     
-    V = rm.extract_meshes(elements,verts)
+    V = rm.extract_meshes(elements, verts)
 
-    #middles,normals = read_mesh.mid_and_normals(meshes)
-    #print("Somme des aires : {}".format(np.sum([fct.area(poly) for poly in V])))
+    # Création du plot avec un seul axe pour superposer les deux graphiques
+    fig, ax = plt.subplots(figsize=(10, 5))  # Un seul axe
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
-    rm.draw_meshes(V,ax1)
+    # Dessin du maillage sur l'axe
+    rm.draw_meshes(V, ax)
 
-    #vem.plot_solution(vertices,test(vertices[:,0],vertices[:,1]),ax2)
-    
-    vem.plot_solution(vertices,u,ax2)
+    # Superposition de la solution sur le même axe
+    vem.plot_solution(vertices, u, ax)
+
+    # Sauvegarde du plot combiné
+    solution_plot_path = os.path.join(output_dir, f'{fname}.png')
+    plt.savefig(solution_plot_path)
     plt.show()
 
+    # Vérification des conditions aux frontières
     bords = [i for i in range(len(vertices)) if fct.is_on_boundary(vertices[i])]
     print(np.max(np.abs(vem.square_boundary_condition(vertices[bords]) - u[bords])))
