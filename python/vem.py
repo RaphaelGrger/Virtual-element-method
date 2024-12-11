@@ -23,13 +23,12 @@ def pertubation(vertices) :
     return vertices
 
 def vem(fname, rhs, boundary_condition):
-    # Charger le maillage
     _, elements, vertices = rm.read_meshes(fname)
     
     bords = [i for i in range(len(vertices)) if fct.is_on_boundary(vertices[i])]
     #vertices = pertubation(vertices)
     elements = rm.csr_to_list(elements)
-
+    
     n_dofs = vertices.shape[0]
     n_polys = 3  # Degré des polynômes (linéaires : 1, x, y)
     
@@ -58,9 +57,8 @@ def vem(fname, rhs, boundary_condition):
             vert = verts[i]
             prev = verts[(i - 1)% n_sides]
             next = verts[(i + 1) % n_sides]
-            vertex_normal = fct.normal_vect(prev, next)
-            np.array([next[1] - prev[1], prev[0] - next[0]]) / diameter
-            
+
+            vertex_normal= np.array([next[1] - prev[1], prev[0] - next[0]])
             for p in range(1, n_polys):
                 poly_degree = linear_polynomial[p]
                 monom_grad = poly_degree / diameter
@@ -70,27 +68,26 @@ def vem(fname, rhs, boundary_condition):
         projector = np.linalg.solve(np.dot(B,D), B) 
         temp = (np.eye(n_sides) - np.dot(D,projector))
         stabilization = np.dot(temp.T , temp)
-        
         G = B @ D
         G[0,:] = 0
+        
         local_stiffness =np.dot( np.dot(projector.T, G) , projector) + stabilization
+        #print(local_stiffness)
         # Assemblage
         for i, vi in enumerate(vert_ids): #ligne
             for j, vj in enumerate(vert_ids): #colonne
                 K[vi, vj] += local_stiffness[i, j]
             F[vi] += rhs(centroid) * area / n_sides
-    
+
     # Conditions aux limites
-    
     u = np.zeros(n_dofs)
        
     boundary = np.array(bords)
-    boundary_vals = boundary_condition(vertices[boundary,:]) 
+    boundary_vals = boundary_condition(vertices[boundary])   
     internal_dofs = np.setdiff1d(np.arange(n_dofs), boundary)
-
-    F-= K[:,boundary]@boundary_vals
     
-    u[internal_dofs] = spsolve(K[internal_dofs][:, internal_dofs], F[internal_dofs])
+    F-= K[:,boundary]@boundary_vals
+    u[internal_dofs] = spsolve(K[internal_dofs, :][:, internal_dofs], F[internal_dofs])
     u[boundary] = boundary_vals
     
     return u, vertices
