@@ -52,10 +52,14 @@ python main.py
 ```
 
 ## Functions:
-- **`read_meshes(fname):`** Return nelements, elements, points.
-- **`print_points(nelements,elements):`** Print sth.
-etc etc, à compléter au fur et à mesure
+- **`read_meshes.py :`** returns meshes in the good format.
+- **`functions.py :`** different functions like boundary, geometry proprieties.
+- **`vem.py :`** the vem function, plots and errors.
+- **`main.py :`** select a mesh .npz and it returns a solution.
+- **`main_convergence.py :`** convergence test of the method.
 
+## Meshes:
+Different meshes are given, and we create different meshes.
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
