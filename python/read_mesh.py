@@ -7,6 +7,8 @@ from scipy.sparse import csr_matrix
 ################### Reading data ###################
 
 input_path = '../meshes/'
+#input_path = '../meshes/generated_meshes/'
+
 #Read meshes
 def read_meshes(fname) :
 
